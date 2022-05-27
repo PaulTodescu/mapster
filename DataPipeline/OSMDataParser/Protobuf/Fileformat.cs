@@ -22,7 +22,8 @@ namespace OSMPBF {
     private static pbr::FileDescriptor descriptor;
 
     static FileformatReflection() {
-      byte[] descriptorData = global::System.Convert.FromBase64String(
+      byte[] descriptorData = global::System.Convert.FromBase64
+                (
           string.Concat(
             "ChBmaWxlZm9ybWF0LnByb3RvEgZPU01QQkYipQEKBEJsb2ISEAoIcmF3X3Np",
             "emUYAiABKAUSDQoDcmF3GAEgASgMSAASEwoJemxpYl9kYXRhGAMgASgMSAAS",

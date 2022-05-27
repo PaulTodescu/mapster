@@ -13,14 +13,14 @@ public static class TileRenderer
         BaseShape? baseShape = null;
 
         var featureType = feature.Type;
-        if (feature.Properties.Any(p => p.Key == "highway" && MapFeature.HighwayTypes.Any(v => p.Value.StartsWith(v))))
+        if (feature.Properties.Any(p => p.Key == FeaturePropertyKey.highway.ToString() && MapFeature.HighwayTypes.Any(v => p.Value.StartsWith(v))))
         {
             var coordinates = feature.Coordinates;
             var road = new Road(coordinates);
             baseShape = road;
             shapes.Enqueue(road, road.ZIndex);
         }
-        else if (feature.Properties.Any(p => p.Key.StartsWith("water")) && feature.Type != GeometryType.Point)
+        else if (feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.water.ToString())) && feature.Type != GeometryType.Point)
         {
             var coordinates = feature.Coordinates;
 
@@ -42,28 +42,30 @@ public static class TileRenderer
             baseShape = popPlace;
             shapes.Enqueue(popPlace, popPlace.ZIndex);
         }
-        else if (feature.Properties.Any(p => p.Key.StartsWith("railway")))
+        else if (feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.railway.ToString())))
         {
             var coordinates = feature.Coordinates;
             var railway = new Railway(coordinates);
             baseShape = railway;
             shapes.Enqueue(railway, railway.ZIndex);
         }
-        else if (feature.Properties.Any(p => p.Key.StartsWith("natural") && featureType == GeometryType.Polygon))
+        else if (feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.natural.ToString()) && featureType == GeometryType.Polygon))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, feature);
             baseShape = geoFeature;
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
-        else if (feature.Properties.Any(p => p.Key.StartsWith("boundary") && p.Value.StartsWith("forest")))
+        else if (feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.boundary.ToString()) && p.Value.StartsWith(FeaturePropertyValue.forest.ToString())))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Forest);
             baseShape = geoFeature;
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
-        else if (feature.Properties.Any(p => p.Key.StartsWith("landuse") && (p.Value.StartsWith("forest") || p.Value.StartsWith("orchard"))))
+        else if (feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.landuse.ToString()) && 
+        (p.Value.StartsWith(FeaturePropertyValue.forest.ToString()) || 
+        p.Value.StartsWith(FeaturePropertyValue.orchard.ToString()))))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Forest);
@@ -71,9 +73,16 @@ public static class TileRenderer
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
         else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p
-                     => p.Key.StartsWith("landuse") && (p.Value.StartsWith("residential") || p.Value.StartsWith("cemetery") || p.Value.StartsWith("industrial") || p.Value.StartsWith("commercial") ||
-                                                        p.Value.StartsWith("square") || p.Value.StartsWith("construction") || p.Value.StartsWith("military") || p.Value.StartsWith("quarry") ||
-                                                        p.Value.StartsWith("brownfield"))))
+                     => p.Key.StartsWith(FeaturePropertyKey.landuse.ToString()) && 
+                     (p.Value.StartsWith(FeaturePropertyValue.residential.ToString()) ||
+                     p.Value.StartsWith(FeaturePropertyValue.cemetery.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.industrial.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.commercial.ToString()) ||
+                     p.Value.StartsWith(FeaturePropertyValue.square.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.construction.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.military.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.quarry.ToString()) ||
+                     p.Value.StartsWith(FeaturePropertyValue.brownfield.ToString()))))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Residential);
@@ -81,8 +90,14 @@ public static class TileRenderer
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
         else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p
-                     => p.Key.StartsWith("landuse") && (p.Value.StartsWith("farm") || p.Value.StartsWith("meadow") || p.Value.StartsWith("grass") || p.Value.StartsWith("greenfield") ||
-                                                        p.Value.StartsWith("recreation_ground") || p.Value.StartsWith("winter_sports") || p.Value.StartsWith("allotments"))))
+                     => p.Key.StartsWith(FeaturePropertyKey.landuse.ToString()) && 
+                     (p.Value.StartsWith(FeaturePropertyValue.farm.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.meadow.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.grass.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.greenfield.ToString()) ||
+                     p.Value.StartsWith(FeaturePropertyValue.recreation_ground.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.winter_sports.ToString()) || 
+                     p.Value.StartsWith(FeaturePropertyValue.allotments.ToString()))))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Plain);
@@ -90,28 +105,30 @@ public static class TileRenderer
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
         else if (feature.Type == GeometryType.Polygon &&
-                 feature.Properties.Any(p => p.Key.StartsWith("landuse") && (p.Value.StartsWith("reservoir") || p.Value.StartsWith("basin"))))
+                 feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.landuse.ToString()) && 
+                 (p.Value.StartsWith(FeaturePropertyValue.reservoir.ToString()) || 
+                 p.Value.StartsWith(FeaturePropertyValue.basin.ToString()))))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Water);
             baseShape = geoFeature;
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
-        else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p => p.Key.StartsWith("building")))
+        else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.building.ToString())))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Residential);
             baseShape = geoFeature;
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
-        else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p => p.Key.StartsWith("leisure")))
+        else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.leisure.ToString())))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Residential);
             baseShape = geoFeature;
             shapes.Enqueue(geoFeature, geoFeature.ZIndex);
         }
-        else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p => p.Key.StartsWith("amenity")))
+        else if (feature.Type == GeometryType.Polygon && feature.Properties.Any(p => p.Key.StartsWith(FeaturePropertyKey.amenity.ToString())))
         {
             var coordinates = feature.Coordinates;
             var geoFeature = new GeoFeature(coordinates, GeoFeature.GeoFeatureType.Residential);

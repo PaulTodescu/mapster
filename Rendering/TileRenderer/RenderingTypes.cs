@@ -3,6 +3,7 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
+using Mapster.Rendering;
 
 namespace Mapster.Rendering;
 
@@ -18,6 +19,24 @@ public struct GeoFeature : BaseShape
         Unknown,
         Water,
         Residential
+    };
+    
+    public enum TerrainType
+    {
+        fell,
+        grassland,
+        heath,
+        moor,
+        scrub,
+        sand,
+        wood,
+        tree_row,
+        bare_rock,
+        rock,
+        wetland,
+        scree,
+        beach,
+        water
     }
 
     public int ZIndex
@@ -105,39 +124,39 @@ public struct GeoFeature : BaseShape
                 (float)MercatorProjection.latToY(c[i].Latitude));
     }
 
-    public GeoFeature(ReadOnlySpan<Coordinate> c, MapFeatureData feature)
+    public GeoFeature(ReadOnlySpan<Coordinate> c, MapFeatureData feature)   
     {
         IsPolygon = feature.Type == GeometryType.Polygon;
-        var naturalKey = feature.Properties.FirstOrDefault(x => x.Key == "natural").Value;
+        var naturalKey = feature.Properties.FirstOrDefault(x => x.Key == FeaturePropertyKey.natural.ToString()).Value;
         Type = GeoFeatureType.Unknown;
         if (naturalKey != null)
         {
-            if (naturalKey == "fell" ||
-                naturalKey == "grassland" ||
-                naturalKey == "heath" ||
-                naturalKey == "moor" ||
-                naturalKey == "scrub" ||
-                naturalKey == "wetland")
+            if (naturalKey == TerrainType.fell.ToString() ||
+                naturalKey == TerrainType.grassland.ToString() ||
+                naturalKey == TerrainType.heath.ToString() ||
+                naturalKey == TerrainType.moor.ToString() ||
+                naturalKey == TerrainType.scrub.ToString() ||
+                naturalKey == TerrainType.wetland.ToString())
             {
                 Type = GeoFeatureType.Plain;
             }
-            else if (naturalKey == "wood" ||
-                     naturalKey == "tree_row")
+            else if (naturalKey == TerrainType.wood.ToString() ||
+                     naturalKey == TerrainType.tree_row.ToString())
             {
                 Type = GeoFeatureType.Forest;
             }
-            else if (naturalKey == "bare_rock" ||
-                     naturalKey == "rock" ||
-                     naturalKey == "scree")
+            else if (naturalKey == TerrainType.bare_rock.ToString() ||
+                     naturalKey == TerrainType.rock.ToString() ||
+                     naturalKey == TerrainType.scree.ToString())
             {
                 Type = GeoFeatureType.Mountains;
             }
-            else if (naturalKey == "beach" ||
-                     naturalKey == "sand")
+            else if (naturalKey == TerrainType.beach.ToString() ||
+                     naturalKey == TerrainType.sand.ToString())
             {
                 Type = GeoFeatureType.Desert;
             }
-            else if (naturalKey == "water")
+            else if (naturalKey == TerrainType.water.ToString())
             {
                 Type = GeoFeatureType.Water;
             }
@@ -202,7 +221,7 @@ public struct PopulatedPlace : BaseShape
         for (var i = 0; i < c.Length; i++)
             ScreenCoordinates[i] = new PointF((float)MercatorProjection.lonToX(c[i].Longitude),
                 (float)MercatorProjection.latToY(c[i].Latitude));
-        var name = feature.Properties.FirstOrDefault(x => x.Key == "name").Value;
+        var name = feature.Properties.FirstOrDefault(x => x.Key == FeaturePropertyKey.name.ToString()).Value;
 
         if (feature.Label.IsEmpty)
         {
@@ -224,10 +243,12 @@ public struct PopulatedPlace : BaseShape
             return false;
         }
         foreach (var entry in feature.Properties)
-            if (entry.Key.StartsWith("place"))
+            if (entry.Key.StartsWith(FeaturePropertyKey.place.ToString()))
             {
-                if (entry.Value.StartsWith("city") || entry.Value.StartsWith("town") ||
-                    entry.Value.StartsWith("locality") || entry.Value.StartsWith("hamlet"))
+                if (entry.Value.StartsWith(FeaturePropertyValue.city.ToString()) || 
+                    entry.Value.StartsWith(FeaturePropertyValue.town.ToString()) ||
+                    entry.Value.StartsWith(FeaturePropertyValue.locality.ToString()) || 
+                    entry.Value.StartsWith(FeaturePropertyValue.hamlet.ToString()))
                 {
                     return true;
                 }
@@ -264,11 +285,11 @@ public struct Border : BaseShape
         var foundLevel = false;
         foreach (var entry in feature.Properties)
         {
-            if (entry.Key.StartsWith("boundary") && entry.Value.StartsWith("administrative"))
+            if (entry.Key.StartsWith(FeaturePropertyKey.boundary.ToString()) && entry.Value.StartsWith(FeaturePropertyValue.administrative.ToString()))
             {
                 foundBoundary = true;
             }
-            if (entry.Key.StartsWith("admin_level") && entry.Value == "2")
+            if (entry.Key.StartsWith(FeaturePropertyKey.admin_level.ToString()) && entry.Value == "2")
             {
                 foundLevel = true;
             }
